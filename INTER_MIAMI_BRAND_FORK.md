@@ -140,6 +140,17 @@ Two-channel rule:
 
 Never apply token changes by manually selecting layers in Figma — always go through the token file or the MCP.
 
+### Placing images (logos, crests, sponsors) into components
+
+1. Create a Rectangle inside the component, sized to the component bounds, `fills = []`
+2. Use `upload_assets` with `nodeId` + `scaleMode: FIT` to place the image
+3. **Immediately** set Scale constraints — do not skip this step:
+   ```js
+   node.constraints = { horizontal: 'SCALE', vertical: 'SCALE' };
+   ```
+   Figma defaults to Left/Top — without Scale the image breaks out of bounds when the component is resized.
+4. Take a screenshot to verify placement before moving on.
+
 ---
 
 ## 6. Next Steps
