@@ -2,7 +2,7 @@
 
 **Branch:** `inter-miami`  
 **Base:** Ghost Design System Core 2.0  
-**Status:** In progress — token fixes applied, colour matrix generated
+**Status:** In progress — Semantic + Component token fixes applied; Chrome & Navigation session complete
 
 ---
 
@@ -25,7 +25,11 @@ Neutrals are the Ghost standard Neutral palette (100–900, Black, White).
 
 ## 2. Token Changes Made
 
-All changes are in `tokens.json` on the `inter-miami` branch. None of these touch the Primitive layer (which stays brand-specific). All fixes target the **Semantic** layer so they cascade to all components automatically.
+All changes are in `tokens.json` on the `inter-miami` branch. None of these touch the Primitive layer (which stays brand-specific).
+
+> **⚠️ Token workflow note:** In a session that covered Chrome & Navigation, some colour changes were applied via direct Figma Plugin API (`node.fills`) rather than via `tokens.json`. This was a workflow error — the two-channel rule was broken. All those direct fills have since been captured in the Component token layer below (Fix C, Fix D, Fix E) so that a Tokens Studio pull on `inter-miami` reproduces the correct visual state. **Always follow the two-channel rule going forward.**
+
+> **⚠️ Tokens Studio branch:** Always confirm Tokens Studio is connected to `inter-miami` (not `main`) before pulling or applying. Check Settings → Sync → Branch field.
 
 ### Fix A — Selected border colour (PageNavigation, Tab, SubNavigation)
 
@@ -110,6 +114,90 @@ Auto-scanned from `Component.C.Color`. Covers all 28 components × 10 surfaces.
 
 ---
 
+### Fix C — BackToTop pink background
+
+**Problem:** BackToTop background was white/transparent (default Ghost treatment).
+
+**Fix:** Component layer Background tokens updated to pink:
+
+```
+Component.C.Color.BackToTop.Background.Enabled → {S.Color.Background.Default.Emphasis}  (= Primary.1 = #FF9CB4)
+Component.C.Color.BackToTop.Background.Hover   → {P.Color.Primary.2}                    (= #FF6B8E)
+Component.C.Color.BackToTop.Background.Active  → {P.Color.Primary.3}                    (= #E8004B)
+```
+
+Labels and icons retain Default.Primary (black on pink — passes 4.5:1 ✓).
+
+---
+
+### Fix D — MoreMenu pink panel background
+
+**Problem:** MoreMenu overlay was dark (Ghost default). Inter Miami requires a light pink panel with black text.
+
+**Fix:** New `Panel-Background` token added to Component layer:
+
+```
+Component.C.Color.MoreMenu.Panel-Background → {S.Color.Background.Default.Emphasis}  (= Primary.1 = #FF9CB4)
+```
+
+Nav item row backgrounds remain `FullyTransparent`; labels remain Default.Primary (black). Section header titles and close button are dark text — readable on pink.
+
+> **Token structure note:** Ghost core has no `Panel-Background` token for MoreMenu. This is a new inter-miami addition. Future brand forks that need a coloured panel should follow this same pattern — add a `Panel-Background` at the component level rather than using a ColourSet override.
+
+---
+
+### Fix E — Navigation XL white text on dark SiteHeader
+
+**Problem:** Navigation.XL label and icon tokens pointed to Default semantics (black text). On the Inter Miami SiteHeader (Large/XL/XX-Large = black background), navigation links were black-on-black.
+
+**Fix:** All three Navigation.XL levels switched to Inverse semantics:
+
+```
+Component.C.Color.Navigation.XL.Level-{1,2,3}.Label.*      → {S.Color.Interaction.Neutral.Inverse.Primary.Label.*}
+Component.C.Color.Navigation.XL.Level-{1,2,3}.Icon.*       → {S.Color.Interaction.Neutral.Inverse.Primary.Icon.*}
+Component.C.Color.Navigation.XL.Level-{1,2,3}.Background.Hover  → {S.Color.Background.Inverse.Subtle}
+Component.C.Color.Navigation.XL.Level-{1,2,3}.Background.Active → {S.Color.Interaction.Neutral.Inverse.Primary.Background.Active}
+Component.C.Color.Navigation.XL.Level-{1,2,3}.Border.*     → {S.Color.Border.HoldingColour.FullyTransparent}
+```
+
+Navigation.Small remains Default (black text) — correct for MoreMenu overlay on pink panel.
+
+Selected indicator stays `{S.Color.Fill.Default.Emphasis}` = Primary.3 (Miami pink) — visible on both surfaces.
+
+---
+
+### Fix F — SiteHeader Large/XL/XX-Large black background (direct fill)
+
+**Problem:** SiteHeader at Large/XL/XX-Large breakpoints was white/transparent (Ghost default). Inter Miami header should be black at wide breakpoints.
+
+**Applied:** Direct Figma fill (`node.fills = [{type:'SOLID', color:{r:0,g:0,b:0}}]`) on SiteHeader component variants.
+
+> **Token debt:** There is no `SiteHeader.Background` Component token in the Ghost token structure. This change lives only as a direct fill in Figma. Future work: add a `Panel-Background` token to SiteHeader in the Component layer (same pattern as Fix D), bind the variant fills to that token, and set it to `{P.Color.Neutral.Black}` on `inter-miami`.
+
+Small and Medium SiteHeader breakpoints remain white/transparent (correct — MoreMenu handles those).
+
+---
+
+### Fix G — MoreMenu section headers, dividers, close button (direct fills)
+
+**Applied via Figma API:**
+- NavSection title bars → transparent background (was dark/black)
+- Nav item dividers → `P.Color.Opacity.Default.10` (10% black, subtle separator)
+- Close button → dark fill, visible on pink panel
+- MY ACCOUNT sign-in link → Inverse label tokens (white on pink — accessible)
+
+> **Token debt:** These properties are not currently tokenized in the Ghost Component layer. Direct fills used as interim fix.
+
+---
+
+### Fix H — MyAccount-DropDown panel white (direct fill)
+
+**Applied:** State=Open wrapper fill changed to transparent so the white DropDownPanel beneath shows through. DropDownPanel itself retains its white surface.
+
+> **Token debt:** No Component token for the DropDown panel background. Direct structural fill used.
+
+---
+
 ## 4. Known Issues & Design Decisions
 
 ### DNP: Default Primary button container (1.97:1)
@@ -155,8 +243,19 @@ Never apply token changes by manually selecting layers in Figma — always go th
 
 ## 6. Next Steps
 
+### Before next token application
+- [ ] **Switch Tokens Studio to `inter-miami` branch** (currently on `main`) — Settings → Sync → Branch
+- [ ] Pull tokens on `inter-miami` and verify Figma renders correctly
+- [ ] Check: BackToTop pink, MoreMenu pink panel, Navigation XL white, SiteHeader black
+
+### Token debt to address
+- [ ] Add `SiteHeader.Background` Component token (Fix F token debt)
+- [ ] Tokenise MoreMenu section header background and divider colour (Fix G token debt)
+- [ ] Tokenise MyAccount-DropDown panel background (Fix H token debt)
+
+### Design work remaining
 - [ ] Decide on CS-5 surface / button contrast (see Known Issues §4)
-- [ ] Footers page — apply Inter Miami brand treatment
+- [ ] Footers page — apply Inter Miami brand treatment (footer section titles → light pink, Footer-Branding bottom stroke → light pink)
 - [ ] Mega menu sub-items (More Menu, Sub Navigation - In Page) — full label pass
 - [ ] Step 10 component checklist: news article card, player card, site header logo position, match ticker, sponsor placement, social buttons
 - [ ] After Core proven on Inter Miami → begin Content file fork (`David-Test-Ghost-Content-2.0`)
