@@ -2,7 +2,7 @@
 
 **Branch:** `inter-miami`  
 **Base:** Ghost Design System Core 2.0  
-**Status:** In progress — Semantic + Component token fixes applied; Chrome & Navigation session complete
+**Status:** In progress — Semantic + Component token fixes applied; Chrome, Navigation & Footer sessions complete
 
 ---
 
@@ -198,6 +198,48 @@ Small and Medium SiteHeader breakpoints remain white/transparent (correct — Mo
 
 ---
 
+### Fix I — Footer brand treatment (black background, pink titles, white text)
+
+**Problem:** Token Studio apply reset the footer to its Ghost default — white/light-surface backgrounds, black text throughout. The Inter Miami footer requires: full black background, light pink (`#FF9CB4`) section/column titles, white body text and links.
+
+**Approach:** Instance-level overrides applied via Figma Plugin API. Token bindings updated at each node to Inverse equivalents so Token Studio preserves the treatment on future apply.
+
+**Master components fixed (background → black):**
+- `Footer-Branding` (106:5133) — variant fills → `S.Color.Background.Inverse.Main`
+- `Footer` (106:7540) — ComponentContainer frames → `S.Color.Background.Inverse.Main`
+- `SponsorGrid-Tier1` (22190:343279) — variant fills → `S.Color.Background.Inverse.Main`
+- `SponsorGrid-TierOther` (11:19146) — token binding added
+- `Footer-SponsorBlock` (15:3991) — variant fills → `S.Color.Background.Inverse.Main`
+- `Footer-AppPromo` (22190:30771) — variant fills → `S.Color.Background.Inverse.Main`
+
+**Text treatment applied across all footer text nodes on the Footers page:**
+
+| Content | Token applied | Colour |
+|---|---|---|
+| GROUP TITLE, Useful links, Find us, Follow us, Official app, TIER labels, {Title} | `S.Color.Background.Default.Emphasis` | `#FF9CB4` (light pink) |
+| Text link, LABEL (nav/footer links) | `S.Color.Interaction.Neutral.Inverse.Primary.Label.Enabled` | `#FFFFFF` |
+| Address text, summary text, copyright, body copy | `S.Color.Text.Inverse.Main` | `#FFFFFF` |
+
+**Vector icons:** Black icon vectors in Footer-Branding and sub-components → `S.Color.Fill.Inverse.Main` (white). Pink/brand vectors in club crest preserved.
+
+**Sponsor grid items** (`C.Color.Footer-Sponsor.Background.Enabled` = `#e9ecef`) intentionally kept light grey — sponsor logo boxes on a dark footer.
+
+**Border separators:** Tier border rectangles → `S.Color.Border.Inverse.Subtle` (white at 15% opacity).
+
+> **Token debt:** The text overrides are applied at the instance level on the Footers page. The library sub-components (Footer-UsefulLinks, Footer-AddressPanel, Footer-SocialPanel, Footer-LegalLinks etc.) use Default semantic tokens internally. A proper fix would be to add `C.Color.Footer.*` Component tokens that reference Inverse semantics, bind them in the Component layer, and pull via Token Studio. As-is, a full Token Studio "apply to all pages" will reset these — the Footers page must be separately verified after each apply.
+
+---
+
+### Fix J — Footer-Branding social icon vectors → white
+
+**Problem:** Social icon vectors (Facebook, Twitter/X, Instagram etc.) in Footer-Branding were black — invisible on the black footer background.
+
+**Fix:** All black VECTOR fills inside Footer-Branding (excluding pink brand/crest vectors) set to `S.Color.Fill.Inverse.Main` (white). 100 vectors updated.
+
+**Kept as-is:** Pink vectors (`#f7b5cd`) within the crest/logo marks are brand elements — not changed.
+
+---
+
 ## 4. Known Issues & Design Decisions
 
 ### DNP: Default Primary button container (1.97:1)
@@ -244,18 +286,19 @@ Never apply token changes by manually selecting layers in Figma — always go th
 ## 6. Next Steps
 
 ### Before next token application
-- [ ] **Switch Tokens Studio to `inter-miami` branch** (currently on `main`) — Settings → Sync → Branch
-- [ ] Pull tokens on `inter-miami` and verify Figma renders correctly
-- [ ] Check: BackToTop pink, MoreMenu pink panel, Navigation XL white, SiteHeader black
+- [x] Switch Tokens Studio to `inter-miami` branch ✓
+- [ ] **⚠️ Footer caveat:** After any Token Studio "apply to all pages", re-verify the Footers page — footer text overrides are instance-level and may reset. Re-run Fix I if needed.
+- [ ] Check post-apply: BackToTop pink ✓, MoreMenu pink panel, Navigation XL white, SiteHeader black, Footer black
 
 ### Token debt to address
 - [ ] Add `SiteHeader.Background` Component token (Fix F token debt)
 - [ ] Tokenise MoreMenu section header background and divider colour (Fix G token debt)
 - [ ] Tokenise MyAccount-DropDown panel background (Fix H token debt)
+- [ ] Add `C.Color.Footer.*` Component tokens for section backgrounds and title colours (Fix I token debt) — this is the proper fix to make footer treatment Token Studio-stable
 
 ### Design work remaining
+- [x] Footers page — Inter Miami brand treatment applied ✓ (Fix I/J)
 - [ ] Decide on CS-5 surface / button contrast (see Known Issues §4)
-- [ ] Footers page — apply Inter Miami brand treatment (footer section titles → light pink, Footer-Branding bottom stroke → light pink)
 - [ ] Mega menu sub-items (More Menu, Sub Navigation - In Page) — full label pass
 - [ ] Step 10 component checklist: news article card, player card, site header logo position, match ticker, sponsor placement, social buttons
 - [ ] After Core proven on Inter Miami → begin Content file fork (`David-Test-Ghost-Content-2.0`)
