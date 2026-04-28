@@ -448,6 +448,26 @@ S.Color.Fill.Default.Emphasis → {P.Color.Primary.3}      → #E8004B
 
 ---
 
+### Fix N — Component demo frame backgrounds: Inter Miami dark surface
+
+**Problem:** All documentation pages (Atoms, Dropdowns, Banners) had Component demo frames set to an unbound Ghost-grey `#f7f7f7`. The Chrome & Navigation and Footers pages use `S.Color.Background.Inverse.Main` (black) for component demo frames, giving them the Inter Miami dark brand feel.
+
+**Pattern (from Footers > Back to Top section):**
+- Section outer frame: remains white `#ffffff` — keeps header/description text readable
+- Component demo frames: `S.Color.Background.Inverse.Main` (black) — brand-dark backdrop
+
+**Fix applied to 23 Component frames across all three pages (via Figma Plugin API):**
+```js
+frame.fills = [{ type: 'SOLID', color: {r:0, g:0, b:0} }];
+frame.setSharedPluginData('tokens', 'fill', JSON.stringify('S.Color.Background.Inverse.Main'));
+```
+
+Also added `S.Color.Background.Default.Main` token binding to the outer section frames (keeping white but making them properly token-controlled).
+
+**Result:** Default-variant components (white panels, light triggers) pop against black — high contrast, Inter Miami white-on-black. Inverse-variant components (dark panels, charcoal triggers) remain visible on black with subtle differentiation. Section header text was already using Inverse-safe tokens inside the documentation template instances.
+
+---
+
 ### Fix M — Banner-Ticker: Brand treatment on TitleContainer
 
 **Problem:** `Banner-Ticker` master component (22648:1065375) — all 4 variants (Small/X-Large × Default/Team) — had `TitleContainer` set to `#dee2e6` (Ghost grey) via `S.Color.Background.Default.Strong`. Text and list items were entirely unbound.
@@ -485,9 +505,9 @@ S.Color.Fill.Default.Emphasis → {P.Color.Primary.3}      → #E8004B
 
 - [x] Chrome page — SiteHeader, Navigation, MoreMenu, BackToTop ✓
 - [x] Footers page — Full Inter Miami brand treatment ✓
-- [x] Atoms page — ProgressBar Ghost-blue indicators fixed ✓
-- [x] Dropdowns page — Inverse Active/Hover contrast bug fixed; master vector bindings added ✓
-- [x] Banners page — Banner-Ticker TitleContainer branded pink; text nodes token-bound ✓
+- [x] Atoms page — ProgressBar Ghost-blue indicators fixed; Component demo frames → black (`S.Color.Background.Inverse.Main`) ✓
+- [x] Dropdowns page — Inverse Active/Hover contrast bug fixed; master vector bindings added; Component demo frames → black ✓
+- [x] Banners page — Banner-Ticker TitleContainer branded pink; text nodes token-bound; Component demo frames → black ✓
 - [ ] Decide on CS-5 surface / button contrast (see Known Issues)
 - [ ] Mega menu NavSection masters — full sub-item label pass
 - [ ] Step 10 component checklist: news article card, player card, match ticker, sponsor placement, social buttons
