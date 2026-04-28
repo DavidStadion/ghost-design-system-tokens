@@ -3,7 +3,7 @@
 **Branch:** `inter-miami`  
 **Base:** Ghost Design System Core 2.0  
 **Figma file:** `David-Test-Inter-Miami-2.0` (file key: `wK1SnviTqfM2j0vK1rObTy`)  
-**Status:** In progress — Semantic + Component token fixes applied; Chrome, Navigation & Footer sessions complete
+**Status:** In progress — Semantic + Component token fixes applied; Chrome, Navigation, Footer, Atoms, Dropdowns & Banners sessions complete
 
 ---
 
@@ -393,6 +393,77 @@ node.setSharedPluginData('tokens', 'fill', JSON.stringify('C.Color.SiteHeader.Ba
 
 ---
 
+## 6b. Component-Level Fixes — Dropdowns, Atoms, Banners
+
+### Fix J — Filter-DropDown-Trigger: Inverse Active/Hover contrast bug
+
+**Problem:** `Filter-DropDown-Trigger` Inverse Active and Inverse Hover variants had `#000000` label text with **no token binding**. These variants render on a `#6c757d` dark-grey background (contrast ≈ 3.0:1 — fails WCAG 1.4.3 AA at 4.5:1).
+
+**Root cause:** Token Studio was not applying to the Dropdowns page; the label fills for Active/Hover states in the Inverse ColourWay were never wired up.
+
+**Fix (via Figma Plugin API):**
+
+```js
+// For each Inverse variant (8 total: Open+Closed × Active+Hover+Enabled+Disabled)
+textNode.fills = [{ type: 'SOLID', color: {r:1,g:1,b:1} }]; // white
+textNode.setSharedPluginData('tokens','fill', JSON.stringify(
+  'S.Color.Interaction.Neutral.Inverse.Primary.Label.Active'  // or Hover/Enabled/Disabled
+));
+```
+
+**Affected nodes:** `Filter-DropDown-Trigger` (3652:382632) — Inverse Active (both Open/Closed) and Inverse Hover (both Open/Closed). White text on `#6c757d` = 4.6:1 ✓ passes WCAG 1.4.3 AA.
+
+---
+
+### Fix K — Dropdown-Trigger-Master: Vector fill token binding
+
+**Problem:** Chevron/arrow VECTOR nodes inside `Dropdown-Trigger-Master` (3697:383348) were set to `#040000` with **no token binding**. These are the leading and trailing icon vectors on both Size=Default and Size=Small variants.
+
+**Fix (via Figma Plugin API):**
+
+```js
+vector.setSharedPluginData('tokens','fill', JSON.stringify('S.Color.Fill.Default.Main'));
+```
+
+`S.Color.Fill.Default.Main` → `{P.Color.Neutral.Black}`. The `Filter-DropDown-Trigger` parent overrides icon colour per state via `C.Color.Dropdown.*Icon.*` tokens at its own level — this master binding is the correct Default fallback.
+
+---
+
+### Fix L — Atoms page: ProgressBar Ghost-blue position indicators
+
+**Problem:** ProgressBar `Position indicator` nodes on the Atoms page (1:19) were showing Ghost main branch colours:
+- Inverse ProgressBar: `#00bcf2` (Ghost blue) — should be white
+- Default ProgressBar: `#1976dc` (Ghost blue) — should be brand pink
+
+These nodes had correct token bindings (`S.Color.Fill.Inverse.Emphasis` and `S.Color.Fill.Default.Emphasis`), but the Atoms page had never had Tokens Studio applied with Inter Miami tokens.
+
+**Token resolution (Inter Miami branch):**
+
+```
+S.Color.Fill.Inverse.Emphasis → {P.Color.Neutral.White}  → #ffffff
+S.Color.Fill.Default.Emphasis → {P.Color.Primary.3}      → #E8004B
+```
+
+**Fix (via Figma Plugin API):** Updated fill colours on all 4 ProgressBar position indicator nodes to match Inter Miami token resolution. No token binding change needed — bindings were already correct.
+
+---
+
+### Fix M — Banner-Ticker: Brand treatment on TitleContainer
+
+**Problem:** `Banner-Ticker` master component (22648:1065375) — all 4 variants (Small/X-Large × Default/Team) — had `TitleContainer` set to `#dee2e6` (Ghost grey) via `S.Color.Background.Default.Strong`. Text and list items were entirely unbound.
+
+**Fix (via Figma Plugin API):**
+
+1. **TitleContainer background**: `S.Color.Background.Default.Strong` → `S.Color.Background.Default.Emphasis` (`{P.Color.Primary.1}` = `#FF9CB4` pastel pink). Black "Title" text on light pink = 10.7:1 ✓ WCAG AAA.
+
+2. **Ticker_ListItem text nodes**: All 5 variants (Numbered, Default, Section Title, Team, Divider) now bound to `S.Color.Text.Default.Main`. Previously unbound.
+
+3. **Team icon vector**: Bound to `S.Color.Fill.Default.Main` (20% opacity is set at the node level, not via token).
+
+**Rationale for pink (not black or brand red):** The Ticker Banner is a content widget displayed on light page surfaces. `Primary.1` (#FF9CB4) gives the header strip a branded pink accent without the visual weight of `Primary.3` (#E8004B), which works better for CTAs and selected states. The overall banner background remains `S.Color.Background.Default.Subtle` (light neutral grey) for readability of the list content.
+
+---
+
 ## 7. Next Steps
 
 ### Before next Token Studio apply
@@ -414,6 +485,9 @@ node.setSharedPluginData('tokens', 'fill', JSON.stringify('C.Color.SiteHeader.Ba
 
 - [x] Chrome page — SiteHeader, Navigation, MoreMenu, BackToTop ✓
 - [x] Footers page — Full Inter Miami brand treatment ✓
+- [x] Atoms page — ProgressBar Ghost-blue indicators fixed ✓
+- [x] Dropdowns page — Inverse Active/Hover contrast bug fixed; master vector bindings added ✓
+- [x] Banners page — Banner-Ticker TitleContainer branded pink; text nodes token-bound ✓
 - [ ] Decide on CS-5 surface / button contrast (see Known Issues)
 - [ ] Mega menu NavSection masters — full sub-item label pass
 - [ ] Step 10 component checklist: news article card, player card, match ticker, sponsor placement, social buttons
